@@ -8,6 +8,23 @@ from minimization import *
 global dka1
 global dka2
 global wfile
+def make_full1(machine):
+    devil_vertex = 'devil'
+    for s in machine.states:
+        devil_vertex+=str(s)
+    full = True
+    for vertex in machine.states:
+        for s in machine.input_alphabet:
+            if (vertex, s) not in machine.transition:
+                full= False
+                machine.transition[(vertex, s)] = set()
+                (machine.transition[(vertex, s)]).add(devil_vertex)
+    if not full:
+        machine.states.add(devil_vertex)
+        for s in machine.input_alphabet:
+            machine.transition[(devil_vertex, s)] = set()
+            (machine.transition[(devil_vertex, s)]).add(devil_vertex)
+    return machine
 def add_slash(t):
     return t.replace("\\", "\\\\").replace("(", "\(").replace(")", "\)").replace("{", "\{").replace("}", "\}").replace('"', '\"').replace('"', '\"')
 def alphabet_association():
@@ -56,11 +73,13 @@ def transition():
     for s1 in dka1.states:
         for s2 in dka2.states:
             for symb in dka1.input_alphabet:
-                for temp1 in dka1.transition[(s1, symb)]:
-                    for temp2 in dka2.transition[(s2, symb)]:
-                        temp_v=set()
-                        temp_v.add((temp1, temp2))
-                        transit[((s1, s2), symb)] = temp_v
+                if (s1, symb) in dka1.transition:
+                    for temp1 in dka1.transition[(s1, symb)]:
+                        if (s2, symb) in dka2.transition:
+                            for temp2 in dka2.transition[(s2, symb)]:
+                                temp_v=set()
+                                temp_v.add((temp1, temp2))
+                                transit[((s1, s2), symb)] = temp_v
     return transit
 
 
@@ -88,7 +107,7 @@ def intersection():
     res.initial_state=initial_state
     res.finite_states=finite_states
     res.input_alphabet=input_alphabet
-    res = minimize(res)
+    res = minimize(make_full1(res))
     wfile.write(printer(res))
 
 
@@ -118,7 +137,7 @@ def association():
     res.initial_state = initial_state
     res.finite_states = finite_states
     res.input_alphabet = input_alphabet
-    res = minimize(res)
+    res = minimize(make_full1(res))
     wfile.write(printer(res))
 
 
@@ -149,7 +168,7 @@ def difference():
     res.initial_state = initial_state
     res.finite_states = finite_states
     res.input_alphabet = input_alphabet
-    res = minimize(res)
+    res = minimize(make_full1(res))
     wfile.write(printer(res))
 
 
@@ -169,7 +188,7 @@ def addition():
     res.initial_state = dka1.initial_state
     res.finite_states = finite_states
     res.input_alphabet = dka1.input_alphabet
-    res = minimize(res)
+    res = minimize(make_full1(res))
     wfile.write(printer(res))
 
 
@@ -180,7 +199,7 @@ def main():
     global wfile
     dka1=FSM()
     dka2=FSM()
-
+    sys.argv += {"association", "ex1.txt", "ex1_2.txt"}
     operation = sys.argv[1]
     wfile = open(sys.argv[2] +"_"+sys.argv[1] + ".out", 'w')
     if operation == "intersection":
