@@ -3,6 +3,7 @@ import sys
 import ply.yacc as yacc
 
 from parser_fsm import *
+from determinization import *
 from minimization import *
 global dka1
 global dka2
@@ -67,6 +68,8 @@ def intersection():
     global dka1
     global dka2
     global wfile
+    dka1 = determine(dka1)
+    dka2 = determine(dka2)
     states = product_of_states()
     initial_state = (dka1.initial_state, dka2.initial_state)
 
@@ -92,6 +95,8 @@ def intersection():
 def association():
     global dka1
     global dka2
+    dka1=determine(dka1)
+    dka2=determine(dka2)
     global wfile
     states = product_of_states()
 
@@ -121,6 +126,8 @@ def difference():
     global dka1
     global dka2
     global wfile
+    dka1 = determine(dka1)
+    dka2 = determine(dka2)
     states = product_of_states()
 
     initial_state = (dka1.initial_state, dka2.initial_state)
@@ -150,6 +157,7 @@ def addition():
     global dka1
     global dka2
     global wfile
+    dka1 = determine(dka1)
     finite_states = set()
     for s in dka1.states:
         if s not in dka1.finite_states:
